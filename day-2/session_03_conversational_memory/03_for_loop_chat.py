@@ -1,3 +1,8 @@
+"""Interactive chat loop with persistent message history.
+Day 2, Session 3: Conversational Memory Part B
+Learning Objective: Implement a loop-based chat session with memory.
+"""
+
 import os
 
 from common import check_env
@@ -6,22 +11,23 @@ from openai import OpenAI
 
 def main():
     check_env()
-    client= OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-    model= os.getenv("OPENAI_MODEL","gpt-5.4-nano")
-    messages=[]
+    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    model = os.getenv("OPENAI_MODEL", "gpt-5.4-nano")
+    messages = []
 
-    print("chat with the bot (type 'exit' to quit):")
+    print("Chat with the bot (type 'exit' to quit):")
     while True:
         user_input = input("You: ")
         if user_input.lower() == "exit":
             break
-        messages.append({"role": "user","content": user_input})
+        messages.append({"role": "user", "content": user_input})
         response = client.responses.create(
             model=model, input=messages, max_output_tokens=150
         )
         assistant_response = response.output_text
         messages.append({"role": "assistant", "content": assistant_response})
-        print("BOT: ", assistant_response)
+        print("Bot:", assistant_response)
+
 
 if __name__ == "__main__":
     main()
