@@ -24,45 +24,88 @@
 =======
 ## Challenge 1: AI Bug Triage Workflow
 
-### What input does your workflow accept?
-A messy, unstructured bug report written in natural language by a QA tester.
+# AI Bug Triage Workflow
 
-### What structured output does it produce?
-A validated JSON object with fields:
-`title`, `module`, `environment`, `browser`, `severity`, `release_blocker`,
-`steps_to_reproduce`, `expected_result`, `actual_result`, `missing_information`, `suggested_next_action`
+## Workflow Overview
 
-Also produces:
-- A **Jira-style ticket payload** (summary, priority, labels, description)
-- A **Slack-style alert message** (only if `release_blocker` is `true`)
+This workflow accepts a messy bug report written in natural language and converts it into structured JSON using the OpenAI API.
 
-### What validation did you add?
-- All required fields must be present
-- `steps_to_reproduce` must be a list
-- `release_blocker` must be a boolean
-- `severity` must be one of: `low`, `medium`, `high`, `critical`
-- `missing_information` must be a list
-- JSON parse errors are caught and reported without crashing the workflow
+The workflow performs the following steps:
 
-### What external system could this connect to?
-- **Jira REST API** — auto-create tickets
-- **Slack Webhooks** — post alerts to QA channel
-- **PagerDuty** — trigger on-call alerts for critical blockers
-- **TestRail / Xray** — link bugs to test cycles
-
-### What can go wrong with this workflow?
-- LLM may return invalid JSON → handled with try/except
-- LLM may guess missing fields instead of flagging them
-- Severity or boolean fields may be returned as wrong types
-- Ambiguous reports may produce inaccurate module/environment detection
-
-### What would you improve next?
-- Retry logic if JSON parsing fails (re-prompt LLM to fix its output)
-- Confidence scoring per extracted field
-- Batch processing of multiple bug reports
-- Direct Jira and Slack API integration
+1. Accepts a bug report as input
+2. Extracts structured JSON using an LLM
+3. Validates required fields using a JSON schema
+4. Generates a Jira-style payload
+5. Generates a Slack-style alert if the issue is a release blocker
 
 ---
+
+## Input
+
+The workflow accepts a natural language bug report.
+
+Example:
+
+During regression testing on staging, the login page is not working properly in Chrome.
+
+---
+
+## Structured Output
+
+The workflow generates structured JSON with fields such as:
+
+- title
+- module
+- environment
+- browser
+- severity
+- release_blocker
+- steps_to_reproduce
+- expected_result
+- actual_result
+- missing_information
+- suggested_next_action
+
+---
+
+## Validation Added
+
+The workflow validates:
+
+- Output must be valid JSON
+- severity must use allowed enum values
+- release_blocker must be boolean
+- steps_to_reproduce must be a list
+- missing_information must be a list
+- Required fields must be present
+
+---
+
+## System Payloads Generated
+
+### Jira-style Payload
+Used for creating issue tickets in Jira.
+
+### Slack-style Alert
+Generated only if the issue is marked as a release blocker.
+
+---
+
+## What Could Go Wrong
+
+- The AI may return incomplete or unclear information
+- The bug report may miss important details
+- Invalid API key or missing environment variables can cause failures
+- Network/API issues may interrupt the workflow
+
+---
+
+## Future Improvements
+
+- Add retry logic for invalid responses
+- Add logging and monitoring
+- Connect directly with Jira and Slack APIs
+- Improve severity detection using additional rules
 
 ## Challenge 2: AI Test Case Generator Workflow
 
