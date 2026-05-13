@@ -40,7 +40,7 @@ def main():
         # Add the AI's reply to history so it "remembers" next time
         messages.append({"role": "assistant", "content": assistant_response})
         
-        print(f"Bot: {assistant_response}")
+        print(f"Bot: {assistant_response}") 
 
 if __name__ == "__main__":
     main()
