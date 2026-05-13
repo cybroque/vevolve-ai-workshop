@@ -1,0 +1,11 @@
+AI Bug Triage Workflow
+Automate the transformation of messy, natural language bug reports into structured, system-ready data for Jira and Slack.
+
+🛠️ How it Works
+Extraction: Uses OpenAI's Structured Outputs (JSON Schema) to force LLM responses into a strictly defined format.
+
+Validation: Automatically validates data types (booleans, arrays) and enforces severity enums (low to critical).
+
+Intelligence: Detects missing info rather than hallucinating and identifies Release Blockers based on context.
+
+Integration: Generates ready-to-use payloads for Jira tickets and real-time Slack alerts.
