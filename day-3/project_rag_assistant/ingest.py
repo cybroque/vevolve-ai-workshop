@@ -1,16 +1,18 @@
-"""Ingest text and PDF documents into a ChromaDB collection."""
+"""Ingest text and PDF documents into a Qdrant collection."""
 
 from __future__ import annotations
 
 import re
+import uuid
 from pathlib import Path
 
-import chromadb
 import pypdf
 from common import get_openai_client
+from qdrant_client import QdrantClient
+from qdrant_client.models import Distance, PointStruct, VectorParams
 
 PROJECT_DIR = Path(__file__).parent
-DB_DIR = PROJECT_DIR / ".chroma"
+DB_DIR = PROJECT_DIR / ".qdrant"
 COLLECTION_NAME = "workshop_rag"
 
 
@@ -66,14 +68,19 @@ def load_documents(directory: Path) -> list[tuple[str, dict]]:
     return documents
 
 
-def get_collection(reset: bool = True):
-    client = chromadb.PersistentClient(path=str(DB_DIR))
-    if reset:
-        try:
-            client.delete_collection(COLLECTION_NAME)
-        except Exception:
-            pass
-    return client.get_or_create_collection(COLLECTION_NAME)
+def get_client() -> QdrantClient:
+    # Use local file-based persistence (equivalent to ChromaDB's PersistentClient)
+    return QdrantClient(path=str(DB_DIR))
+
+
+def get_collection(qdrant: QdrantClient, dim: int, reset: bool = True):
+    if reset and qdrant.collection_exists(COLLECTION_NAME):
+        qdrant.delete_collection(COLLECTION_NAME)
+
+    qdrant.create_collection(
+        collection_name=COLLECTION_NAME,
+        vectors_config=VectorParams(size=dim, distance=Distance.COSINE),
+    )
 
 
 def ingest_directory(
@@ -86,9 +93,15 @@ def ingest_directory(
         for chunk_index, chunk in enumerate(chunks):
             records.append(
                 {
-                    "id": f"{metadata['source']}:{metadata['page']}:{chunk_index}",
+                    # Qdrant requires UUID or integer IDs, not arbitrary strings
+                    "id": str(uuid.uuid4()),
                     "text": chunk,
-                    "metadata": {**metadata, "chunk_index": chunk_index},
+                    "metadata": {
+                        **metadata,
+                        "chunk_index": chunk_index,
+                        # Preserve the original string ID as a payload field for traceability
+                        "original_id": f"{metadata['source']}:{metadata['page']}:{chunk_index}",
+                    },
                 }
             )
 
@@ -96,13 +109,21 @@ def ingest_directory(
         raise ValueError(f"No .txt or .pdf documents found in {directory}")
 
     embeddings = embed_texts([record["text"] for record in records])
-    collection = get_collection(reset=True)
-    collection.add(
-        ids=[record["id"] for record in records],
-        documents=[record["text"] for record in records],
-        metadatas=[record["metadata"] for record in records],
-        embeddings=embeddings,
-    )
+    dim = len(embeddings[0])
+
+    qdrant = get_client()
+    get_collection(qdrant, dim=dim, reset=True)
+
+    points = [
+        PointStruct(
+            id=record["id"],
+            vector=embeddings[i],
+            payload={"text": record["text"], **record["metadata"]},
+        )
+        for i, record in enumerate(records)
+    ]
+
+    qdrant.upsert(collection_name=COLLECTION_NAME, points=points)
     return len(records)
 
 
