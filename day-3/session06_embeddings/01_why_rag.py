@@ -5,7 +5,7 @@ Learning Objective: Understand why RAG is needed vs naive LLM calls.
 
 import os
 
-from common import get_openai_client, get_workshop_model
+from session06_embeddings.common import get_openai_client, get_workshop_model
 
 
 def naive_llm_call(query):

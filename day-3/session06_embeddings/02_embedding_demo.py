@@ -3,7 +3,7 @@ Day 3, Session 6: Embeddings Part B
 Learning Objective: Understand what embeddings are and how to generate them.
 """
 
-from common import get_openai_client
+from session06_embeddings.common import get_openai_client
 
 
 def main():
