@@ -7,10 +7,15 @@ from common import get_openai_client
 from ingest import COLLECTION_NAME, DB_DIR
 
 
+
 def embed_texts(texts: list[str]) -> list[list[float]]:
     client = get_openai_client()
-    response = client.embeddings.create(model="text-embedding-3-small", input=texts)
+    response = client.embeddings.create(
+        model="text-embedding-3-small",
+        input=texts
+    )
     return [item.embedding for item in response.data]
+
 
 
 def get_collection():
@@ -20,40 +25,74 @@ def get_collection():
 
 def retrieve(question: str, *, top_k: int = 3) -> list[dict]:
     question_embedding = embed_texts([question])[0]
+
     results = get_collection().query(
         query_embeddings=[question_embedding],
         n_results=top_k,
     )
+
     documents = results.get("documents", [[]])[0]
     metadatas = results.get("metadatas", [[]])[0]
-    return [{"text": text, **metadata} for text, metadata in zip(documents, metadatas)]
+
+    return [
+        {"text": text, **metadata}
+        for text, metadata in zip(documents, metadatas)
+    ]
+
+
+
+def ask_model(prompt: str, max_output_tokens: int = 600) -> str:
+    client = get_openai_client()
+
+    response = client.responses.create(
+        model="gpt-4o-mini",
+        input=prompt,
+        max_output_tokens=max_output_tokens
+    )
+
+  
+    return response.output[0].content[0].text
+
 
 
 def answer_question(question: str, *, top_k: int = 3) -> dict:
     chunks = retrieve(question, top_k=top_k)
-    print(chunks)
+
+    print("\nRetrieved Chunks:\n", chunks)
+
     context = "\n\n".join(
         f"Source: {chunk['source']} chunk {chunk['chunk_index']}\n{chunk['text']}"
         for chunk in chunks
     )
+
     prompt = f"""
-    Answer the question using only the context below.
-    If the context is not enough, say: I do not have enough information.
-    Include a short "Sources" line at the end.
+Answer the question using only the context below.
+If the context is not enough, say: I do not have enough information.
+Include a short "Sources" line at the end.
 
-    Context:
-    {context}
+Context:
+{context}
 
-    Question:
-    {question}
-    """
-    return {"answer": ask_model(prompt, max_output_tokens=600), "sources": chunks}
+Question:
+{question}
+"""
+
+    answer = ask_model(prompt, max_output_tokens=600)
+
+    return {
+        "answer": answer,
+        "sources": chunks
+    }
+
 
 
 def main():
     question = "Why is metadata useful in a RAG system?"
+
     result = answer_question(question)
-    print(result["answer"])
+
+    print("\nAnswer:\n", result["answer"])
+
     print("\nRetrieved chunks:")
     for source in result["sources"]:
         print(f"- {source['source']} chunk {source['chunk_index']}")
