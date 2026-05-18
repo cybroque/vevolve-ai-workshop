@@ -35,7 +35,7 @@ def main():
     )
 
     Test_case_generator = Agent(
-        role="Automation Test Case Generator",
+        role="Test Case Generator",
         goal=(
             "Generate detailed functional and edge-case test cases "
             "based on the analyzed bug report."
