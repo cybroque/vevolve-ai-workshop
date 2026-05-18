@@ -7,7 +7,7 @@ from pathlib import Path
 
 import chromadb
 import pypdf
-from common import get_openai_client
+from session06_embeddings.common import get_openai_client
 
 
 def main():

@@ -1,17 +1,11 @@
 
-
-
-"""Enforce structured output with JSON Schema.
-Day 2, Session 4: Structured Outputs Part A
-Learning Objective: Use schema-shaped output for code-readable responses.
-"""
-
 import json
 import os
 
 from common import check_env
 from openai import OpenAI
 
+# Example 1: Product schema
 PRODUCT_SCHEMA = {
     "type": "object",
     "properties": {
@@ -23,12 +17,7 @@ PRODUCT_SCHEMA = {
             "items": {"type": "string"},
         },
     },
-    "required": [
-        "product_name",
-        "price",
-        "in_stock",
-        "tags"
-    ],
+    "required": ["product_name", "price", "in_stock"],
     "additionalProperties": False,
 }
 
@@ -36,6 +25,7 @@ PRODUCT_SCHEMA = {
 def main():
     check_env()
     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
     data = client.responses.create(
         model=os.getenv("OPENAI_MODEL", "gpt-5.4-nano"),
         instructions="Return only data that matches the provided JSON schema.",
@@ -49,6 +39,7 @@ def main():
             }
         },
     )
+
     print("JSON Output:", data.output_text)
 
     result = json.loads(data.output_text)
