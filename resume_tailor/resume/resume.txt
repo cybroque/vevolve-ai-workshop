@@ -1,0 +1,11 @@
+John Doe
+
+Software Engineer with 5 years of experience building scalable web applications and data-driven tools. Skilled in Python, JavaScript, AWS, and machine learning. Proven ability to translate product requirements into high-impact technical solutions.
+
+Experience:
+- Developed a customer analytics platform that improved retention by 18%.
+- Led migration of legacy ETL pipelines to AWS Lambda and S3.
+- Collaborated with cross-functional teams to deliver product releases on time.
+
+Education:
+Bachelor of Science in Computer Science
