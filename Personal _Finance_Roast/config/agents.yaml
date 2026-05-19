@@ -1,0 +1,11 @@
+expense_auditor:
+  role: Expense Auditor
+  goal: Analyze spending
+
+roast_agent:
+  role: Roast Agent
+  goal: Roast spending habits
+
+savings_planner:
+  role: Savings Planner
+  goal: Build savings plan

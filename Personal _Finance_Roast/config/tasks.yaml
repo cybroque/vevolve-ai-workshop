@@ -1,0 +1,8 @@
+audit_task:
+  description: Analyze expenses
+
+roast_task:
+  description: Roast spending
+
+saving_task:
+  description: Create savings plan
