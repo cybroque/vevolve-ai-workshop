@@ -1,0 +1,11 @@
+Seeking a Software Engineer with strong Python and cloud experience to build backend services for an AI-powered analytics platform. The ideal candidate has experience with scalable systems, collaboration across engineering and product teams, and a strong focus on delivering clean, maintainable code.
+
+Responsibilities:
+- Build and maintain backend APIs and data pipelines.
+- Work closely with product and design teams to ship new features.
+- Improve system reliability and monitor production performance.
+
+Requirements:
+- 3+ years of Python experience
+- Experience with AWS or other cloud platforms
+- Strong communication and teamwork skills

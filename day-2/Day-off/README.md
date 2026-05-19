@@ -1,6 +1,3 @@
-
-# README.md: 
-
 ##  Workflow
 
 1. **Input:** Receives a raw support message.
