@@ -1,4 +1,4 @@
-"""Streamlit UI for the Day 3 RAG assistant."""
+"""Streamlit Chatbot UI for the Day 3 RAG assistant."""
 
 import shutil
 import sys
@@ -15,8 +15,13 @@ from ingest import PROJECT_DIR, ingest_directory
 UPLOAD_DIR = PROJECT_DIR / "uploaded_docs"
 UPLOAD_DIR.mkdir(exist_ok=True)
 
-st.set_page_config(page_title="RAG Assistant")
-st.title("RAG Knowledge Base Assistant")
+st.set_page_config(page_title="RAG Chatbot")
+st.title("🤖 RAG Knowledge Base Chatbot")
+
+
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
 
 uploaded_files = st.file_uploader(
     "Upload .txt or .pdf documents",
@@ -46,12 +51,35 @@ if st.button("Ingest documents"):
         count = ingest_directory(source_dir, chunk_size=chunk_size)
     st.success(f"Ingested {count} chunks")
 
-question = st.text_input("Ask a question", value="Why is metadata useful in RAG?")
-if st.button("Ask"):
-    with st.spinner("Retrieving and answering..."):
-        result = answer_question(question, top_k=top_k)
-    st.write(result["answer"])
-    st.subheader("Retrieved Sources")
-    for source in result["sources"]:
-        st.markdown(f"**{source['source']}** chunk `{source['chunk_index']}`")
-        st.caption(source["text"])
+
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
+
+
+if prompt := st.chat_input("Ask something about your documents..."):
+   
+    st.session_state.messages.append({"role": "user", "content": prompt})
+
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+   
+    with st.chat_message("assistant"):
+        with st.spinner("Thinking..."):
+            result = answer_question(prompt, top_k=top_k)
+
+        answer = result["answer"]
+
+        st.markdown(answer)
+
+       
+        with st.expander("Sources"):
+            for source in result["sources"]:
+                st.markdown(f"**{source['source']}** chunk `{source['chunk_index']}`")
+                st.caption(source["text"])
+
+
+    st.session_state.messages.append(
+        {"role": "assistant", "content": answer}
+    )
