@@ -24,7 +24,7 @@ def main():
     check_env()
     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
     data = client.responses.create(
-        model=os.getenv("OPENAI_MODEL", "gpt-5.4-nano"),
+        model=os.getenv("OPENAI_MODEL", "gpt-5.4-"),
         instructions="Return only data that matches the provided JSON schema.",
         input="Extract this person: Priya is 34 years old.",
         text={
